@@ -25,6 +25,7 @@ from django.utils import simplejson
 
 as_default_help = u'Enter text to search.'
 
+
 ####################################################################################
 
 class AutoCompleteSelectWidget(forms.widgets.TextInput):
@@ -117,11 +118,12 @@ class AutoCompleteSelectField(forms.fields.CharField):
             widget_kwargs = dict(
                 channel = channel,
                 help_text = kwargs.get('help_text',_(as_default_help)),
-                show_help_text = kwargs.pop('show_help_text',True),
-                plugin_options = kwargs.pop('plugin_options',{})
+                show_help_text = kwargs.pop('show_help_text', True),
+                plugin_options = kwargs.pop('plugin_options', {}),
+                attrs = kwargs.pop('attrs', {}),
             )
             kwargs["widget"] = AutoCompleteSelectWidget(**widget_kwargs)
-        super(AutoCompleteSelectField, self).__init__(max_length=255,*args, **kwargs)
+        super(AutoCompleteSelectField, self).__init__(max_length=255, *args, **kwargs)
 
     def clean(self, value):
         if value:
@@ -144,6 +146,36 @@ class AutoCompleteSelectField(forms.fields.CharField):
 
 ####################################################################################
 
+class AutoCompleteCascadeSelectField(AutoCompleteSelectField):
+    """An extension of AutoCompleteSelectField, which allows selecting values
+    depending on the value present in another AutoCompleteSelectField
+    ('cascading selects').
+    In order to use it, you have to specify two things:
+    1. 'parent_field', which is a constructor's parameter pointing to the
+       actual field (i.e. its object);
+    2. parent widget's id, which should be specified through the attrs on the
+       *parent* field (e.g. attrs={'id': 'id_parent_field'}) - this id will be
+       available here as parent_field_widget_id.
+    And also, this field should be used together with CascadeLookupChannel.
+    """
+    def __init__(self, channel, *args, **kwargs):
+        if 'parent_field' in kwargs:
+            parent_field = kwargs.pop('parent_field')
+            parent_field_widget_id = parent_field.widget.attrs.get('id')
+            attrs = kwargs.pop('attrs', {})
+            attrs.update({'data-parent-id': parent_field_widget_id})
+            widget_kwargs = dict(
+                channel = channel,
+                help_text = kwargs.get('help_text',_(as_default_help)),
+                show_help_text = kwargs.pop('show_help_text', True),
+                plugin_options = kwargs.pop('plugin_options', {}),
+                attrs = attrs,
+            )
+            kwargs['widget'] = AutoCompleteSelectWidget(**widget_kwargs)
+        super(AutoCompleteCascadeSelectField, self).__init__(channel, *args, **kwargs)
+
+
+####################################################################################
 
 class AutoCompleteSelectMultipleWidget(forms.widgets.SelectMultiple):
 
@@ -290,7 +322,6 @@ class AutoCompleteSelectMultipleField(forms.fields.CharField):
 
 ####################################################################################
 
-
 class AutoCompleteWidget(forms.TextInput):
     """
     Widget to select a search result and enter the result as raw text in the text input field.
@@ -432,5 +463,3 @@ def bootstrap():
         b['inline'] = mark_safe("""<style type="text/css">@import url("%sajax_select/css/ajax_select.css");</style><script type="text/javascript" src="%sajax_select/js/ajax_select.js"></script>""" % (settings.STATIC_URL,settings.STATIC_URL))
 
     return b
-
-
