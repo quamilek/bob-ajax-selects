@@ -197,6 +197,33 @@ window.didAddPopup = function (win,newId,newRepr) {
 	win.close();
 }
 
-})(jQuery);
+$(document).ready(function () {
+    // iterate over all child inputs having 'data-parent-id' as an attribute
+    $('input[data-parent-id]').each(function (i, input) {
+        var inputHiddenId = input.id.substring(0, input.id.length - 5);
+        var inputHiddenSel = 'input[type=hidden]#' + inputHiddenId;
+        // wait until given autocomplete field is fully ready, otherwise you may
+        // get some strange errors here (e.g. disappearing 'autocomplete' data)
+        $(input).on('autocompletecreate', function () {
+            var parent = $('#' + $(input).data('parentId'));
+            var parentDeck = $('#' + $(input).data('parentId') + '_on_deck');
+            // get the original AJAX source
+            var options = $(input).data('autocomplete').options;
+            var source = options.source;
+            // modify the autocomplete function in a way that it apart the usual
+            // query (term) it should also send the value selected in the parent
+            // field (pk)
+            var pk = parseInt(parent.val(), 10);
+            $(input).autocomplete("option", "source", function(request, response) {
+                $.getJSON(source, {'term': request.term, 'parent_pk': pk}, response);
+            });
+        });
+        // reset the value on the hidden field when the current selection gets killed
+        $('#' + inputHiddenId + '_on_deck').on('killed', function () {
+            $(inputHiddenSel).val('');
+        })
+    });
+});
 
+})(jQuery);
 }
