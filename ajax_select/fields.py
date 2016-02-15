@@ -65,10 +65,10 @@ class AutoCompleteSelectWidget(forms.widgets.TextInput):
                 obj = objs[0]
             except IndexError:
                 current_repr = '''
-                    <div class="label">'
+                    <div class="label">
                         {} with id: {} not found
                     </div>'''.format(
-                    self.model._meta.verbose_name, value
+                    lookup.model._meta.verbose_name.capitalize(), value
                 )
             else:
                 url = lookup.get_item_url(obj)
