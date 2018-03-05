@@ -2,11 +2,11 @@
 bob-ajax-selects
 ================
 
-.. image:: https://pypip.in/v/bob-ajax-selects/badge.png
+.. image:: https://img.shields.io/pypi/v/bob-ajax-selects.svg
     :target: https://crate.io/packages/bob-ajax-selects/
     :alt: Latest PyPI version
 
-.. image:: https://pypip.in/d/bob-ajax-selects/badge.png
+.. image:: https://img.shields.io/pypi/dm/bob-ajax-selects.svg
     :target: https://crate.io/packages/bob-ajax-selects/
     :alt: Number of PyPI downloads
 
